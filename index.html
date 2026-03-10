@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuSmart | AI-Powered Document Management</title>
+    <meta name="description"
+        content="DocuSmart is a premium AI-powered document management system featuring automated data extraction, intelligent categorization, and streamlined workflows.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <span class="logo-text">DocuSmart</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#upload" class="nav-link" data-section="upload">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Upload Documents</span>
+                </a>
+                <a href="#library" class="nav-link" data-section="library">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <span>Document Library</span>
+                </a>
+                <a href="#extracted-data" class="nav-link" data-section="extracted-data">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Extracted Data</span>
+                </a>
+                <a href="#categories" class="nav-link" data-section="categories">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Categories</span>
+                </a>
+                <a href="#workflows" class="nav-link" data-section="workflows">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    <span>Workflows</span>
+                </a>
+                <a href="#reports" class="nav-link" data-section="reports">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span>Reports</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">JD</div>
+                    <div class="user-info">
+                        <span class="user-name">John Doe</span>
+                        <span class="user-role">Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="header-search">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" placeholder="Search documents, data, or workflows..." aria-label="Search">
+                </div>
+                <div class="header-actions">
+                    <button class="action-btn" title="Notifications">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </button>
+                    <button class="action-btn" title="Settings">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-viewport">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="content-section active">
+                    <div class="section-header">
+                        <h1>Dashboard</h1>
+                        <p>Welcome back! Here's what's happening with your documents today.</p>
+                    </div>
+                    <div class="placeholder-grid">
+                        <!-- Dashboard content will go here -->
+                    </div>
+                </section>
+
+                <!-- Upload Section -->
+                <section id="upload" class="content-section">
+                    <div class="section-header">
+                        <h1>Upload Documents</h1>
+                        <p>Securely upload and process your files using our AI engine.</p>
+                    </div>
+
+                    <div class="upload-container">
+                        <div id="drop-zone" class="drop-zone">
+                            <div class="drop-zone-content">
+                                <div class="upload-icon-container">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <h2 class="drop-zone-title">Drag & drop your files here</h2>
+                                <p class="drop-zone-subtitle">Supported formats: PDF, PNG, JPG, DOCX (Max 20MB)</p>
+                                <button class="browse-btn" id="browse-btn">Browse Files</button>
+                                <input type="file" id="file-input" hidden accept=".pdf,.png,.jpg,.jpeg,.docx">
+                            </div>
+                        </div>
+
+                        <div id="upload-progress-panel" class="upload-panel hidden">
+                            <div class="panel-header">
+                                <h3 id="upload-status-text">Uploading document...</h3>
+                                <span id="upload-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                            </div>
+                        </div>
+
+                        <div id="preview-panel" class="upload-panel hidden">
+                            <div class="preview-grid">
+                                <div class="preview-thumbnail" id="preview-thumbnail">
+                                    <div class="scan-line"></div>
+                                    <!-- Dynamic content based on file type -->
+                                    <div class="thumbnail-placeholder">
+                                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="file-metadata">
+                                    <h3 class="panel-title">File Details</h3>
+                                    <div class="metadata-list">
+                                        <div class="metadata-item">
+                                            <span class="label">Name</span>
+                                            <span class="value" id="file-name">-</span>
+                                        </div>
+                                        <div class="metadata-item">
+                                            <span class="label">Size</span>
+                                            <span class="value" id="file-size">-</span>
+                                        </div>
+                                        <div class="metadata-item">
+                                            <span class="label">Type</span>
+                                            <span class="value" id="file-type">-</span>
+                                        </div>
+                                        <div class="metadata-item">
+                                            <span class="label">Uploaded</span>
+                                            <span class="value" id="file-date">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="panel-actions">
+                                        <button class="primary-btn process-btn" id="process-btn">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                            </svg>
+                                            Process with OCR & AI
+                                        </button>
+                                        <button class="secondary-btn" id="cancel-btn">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- New Extraction Results Panel -->
+                            <div id="extraction-results-container" class="hidden">
+                                <div class="panel-divider"
+                                    style="height: 1px; background: var(--border-color); margin: 2rem 0;"></div>
+                                <h3 class="panel-title">Extracted AI Data</h3>
+                                <div id="extraction-results" class="extraction-results">
+                                    <!-- Field cards will be injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Library Section -->
+                <section id="library" class="content-section">
+                    <div class="section-header">
+                        <div class="header-main">
+                            <h1>Document Library</h1>
+                            <p>Browse and manage your entire collection of digitized documents.</p>
+                        </div>
+                        <div class="view-controls">
+                            <button class="view-btn active" id="grid-view-btn" title="Grid View">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                            </button>
+                            <button class="view-btn" id="list-view-btn" title="List View">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="library-toolbar">
+                        <div class="library-search">
+                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="library-search-input"
+                                placeholder="Search by name, type, or extracted data...">
+                        </div>
+
+                        <div class="library-filters">
+                            <select id="filter-category" class="filter-select">
+                                <option value="all">All Categories</option>
+                                <option value="Invoices">Invoices</option>
+                                <option value="Contracts">Contracts</option>
+                                <option value="Reports">Reports</option>
+                                <option value="Identity">Identity</option>
+                                <option value="Receipts">Receipts</option>
+                            </select>
+
+                            <select id="filter-type" class="filter-select">
+                                <option value="all">All Types</option>
+                                <option value="Commercial Invoice">Invoice</option>
+                                <option value="Service Agreement">Agreement</option>
+                                <option value="Financial Report">Report</option>
+                                <option value="Passport">Passport</option>
+                            </select>
+
+                            <select id="filter-confidence" class="filter-select">
+                                <option value="all">All Confidence</option>
+                                <option value="high">High Only</option>
+                                <option value="medium">Medium +</option>
+                            </select>
+
+                            <select id="sort-by" class="filter-select">
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="name-asc">Name A-Z</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="library-grid" class="library-grid">
+                        <!-- Document cards will be injected here -->
+                    </div>
+
+                    <div id="library-empty" class="library-empty hidden">
+                        <div class="empty-icon">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <h3>No documents found</h3>
+                        <p>Try adjusting your search or filters, or upload a new document.</p>
+                        <a href="#upload" class="primary-btn" style="width: auto; margin-top: 1rem;">Upload Now</a>
+                    </div>
+                </section>
+
+                <!-- Extracted Data Section -->
+                <section id="extracted-data" class="content-section">
+                    <div class="section-header">
+                        <h1>Extracted Data</h1>
+                        <p>Review and export data automatically captured from your documents.</p>
+                    </div>
+                    <div class="placeholder-grid"></div>
+                </section>
+
+                <!-- Categories Section -->
+                <section id="categories" class="content-section">
+                    <div class="section-header">
+                        <h1>Categories</h1>
+                        <p>Organize your documents into smart, searchable categories.</p>
+                    </div>
+                    <div class="categories-grid" id="categories-grid">
+                        <div class="category-card" data-category="Invoices"
+                            style="--category-color: #f59e0b; --category-color-rgb: 245, 158, 11;">
+                            <svg class="folder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
+                            </svg>
+                            <div class="category-info">
+                                <span class="category-name">Invoices</span>
+                                <span class="category-count" id="count-invoices">12 Documents</span>
+                            </div>
+                            <span class="category-label">Finance</span>
+                        </div>
+                        <div class="category-card" data-category="Contracts"
+                            style="--category-color: #10b981; --category-color-rgb: 16, 185, 129;">
+                            <svg class="folder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
+                            </svg>
+                            <div class="category-info">
+                                <span class="category-name">Contracts</span>
+                                <span class="category-count" id="count-contracts">8 Documents</span>
+                            </div>
+                            <span class="category-label">Legal</span>
+                        </div>
+                        <div class="category-card" data-category="Reports"
+                            style="--category-color: #3b82f6; --category-color-rgb: 59, 130, 246;">
+                            <svg class="folder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
+                            </svg>
+                            <div class="category-info">
+                                <span class="category-name">Reports</span>
+                                <span class="category-count" id="count-reports">24 Documents</span>
+                            </div>
+                            <span class="category-label">Business</span>
+                        </div>
+                        <div class="category-card" data-category="Identity"
+                            style="--category-color: #8b5cf6; --category-color-rgb: 139, 92, 246;">
+                            <svg class="folder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
+                            </svg>
+                            <div class="category-info">
+                                <span class="category-name">Identity</span>
+                                <span class="category-count" id="count-identity">4 Documents</span>
+                            </div>
+                            <span class="category-label">Personal</span>
+                        </div>
+                        <div class="category-card" data-category="Receipts"
+                            style="--category-color: #ec4899; --category-color-rgb: 236, 72, 153;">
+                            <svg class="folder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
+                            </svg>
+                            <div class="category-info">
+                                <span class="category-name">Receipts</span>
+                                <span class="category-count" id="count-receipts">42 Documents</span>
+                            </div>
+                            <span class="category-label">Finance</span>
+                        </div>
+                        <div class="category-card" data-category="Uncategorized"
+                            style="--category-color: #94a3b8; --category-color-rgb: 148, 163, 184;">
+                            <svg class="folder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
+                            </svg>
+                            <div class="category-info">
+                                <span class="category-name">Uncategorized</span>
+                                <span class="category-count" id="count-uncategorized">0 Documents</span>
+                            </div>
+                            <span class="category-label">General</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Workflows Section -->
+                <section id="workflows" class="content-section">
+                    <div class="section-header">
+                        <div class="header-main">
+                            <h1>Automated Workflows</h1>
+                            <p>Create and manage intelligent automation rules based on extracted document data.</p>
+                        </div>
+                        <button class="primary-btn" id="add-workflow-btn" style="width: auto;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New Workflow
+                        </button>
+                    </div>
+
+                    <!-- Rule Builder (Initially Hidden) -->
+                    <div id="rule-builder" class="rule-builder hidden">
+                        <div class="builder-header">
+                            <h3>Create Workflow Rule</h3>
+                            <button class="icon-btn" id="close-builder-btn">&times;</button>
+                        </div>
+                        <div class="builder-content">
+                            <div class="builder-group">
+                                <label>If document match conditions...</label>
+                                <div class="builder-row">
+                                    <select id="rule-field" class="builder-select">
+                                        <option value="type">Document Type</option>
+                                        <option value="amount">Amount</option>
+                                        <option value="category">Category</option>
+                                        <option value="confidence">Confidence</option>
+                                    </select>
+                                    <select id="rule-operator" class="builder-select">
+                                        <option value="equals">is exactly</option>
+                                        <option value="contains">contains</option>
+                                        <option value="gt">is greater than</option>
+                                        <option value="lt">is less than</option>
+                                    </select>
+                                    <input type="text" id="rule-value" class="builder-input" placeholder="Value...">
+                                </div>
+                            </div>
+                            <div class="builder-arrow">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <polyline points="19 12 12 19 5 12"></polyline>
+                                </svg>
+                            </div>
+                            <div class="builder-group">
+                                <label>Then perform action...</label>
+                                <div class="builder-row">
+                                    <select id="rule-action" class="builder-select">
+                                        <option value="alert">Send High-Priority Alert</option>
+                                        <option value="summarize">Generate AI Summary Report</option>
+                                        <option value="export">Export to Cloud Storage</option>
+                                        <option value="flag">Flag for Manual Review</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="builder-footer">
+                            <button class="secondary-btn" id="cancel-rule-btn">Cancel</button>
+                            <button class="primary-btn" id="save-rule-btn">Save Workflow</button>
+                        </div>
+                    </div>
+
+                    <div class="workflow-grid" id="workflow-rules-grid">
+                        <!-- Workflow rules will be injected here -->
+                    </div>
+                </section>
+
+                <!-- Reports Section -->
+                <section id="reports" class="content-section">
+                    <div class="section-header">
+                        <h1>Reports</h1>
+                        <p>Insightful analytics and trends on document processing and data.</p>
+                    </div>
+                    <div class="placeholder-grid"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="bg-blur-circles">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+    <div class="workflow-banner-container" id="workflow-banner-container"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
