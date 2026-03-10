@@ -2484,3 +2484,51 @@ body.light-mode .mobile-nav {
     border-radius: 50%;
     background: var(--category-color);
 }
+
+/* MeritPortal Specific Styles */
+.merit-zone {
+    padding: 2rem !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.merit-zone:hover {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.merit-zone .upload-icon-container {
+    width: 60px !important;
+    height: 60px !important;
+    margin-bottom: 1rem !important;
+}
+
+.merit-progress-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.merit-progress-details span b {
+    color: var(--text-main);
+}
+
+#merit-process-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.merit-results-preview {
+    margin-top: 2rem;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.merit-zone.drag-over {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: var(--primary-color) !important;
+    transform: scale(1.02);
+}

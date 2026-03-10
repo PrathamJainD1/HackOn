@@ -1668,6 +1668,170 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- MeritPortal Logic ---
+    const meritCapZone = document.getElementById('cap-drop-zone');
+    const meritJeeZone = document.getElementById('jee-drop-zone');
+    const meritProcessBtn = document.getElementById('merit-process-btn');
+    const meritProgressContainer = document.getElementById('merit-progress-container');
+    const meritResultsSection = document.getElementById('merit-results-section');
+
+    function setupMeritZone(zone) {
+        const input = zone.querySelector('input[type="file"]');
+        const prompt = zone.querySelector('.drop-zone-subtitle');
+
+        zone.addEventListener('click', () => input.click());
+
+        input.addEventListener('change', () => {
+            if (input.files.length) {
+                prompt.innerText = input.files[0].name;
+                prompt.style.color = 'var(--primary)';
+                prompt.style.fontWeight = '600';
+                checkMeritInputs();
+            }
+        });
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+
+        ['dragleave', 'drop'].forEach(type => {
+            zone.addEventListener(type, () => zone.classList.remove('drag-over'));
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                input.files = e.dataTransfer.files;
+                prompt.innerText = input.files[0].name;
+                prompt.style.color = 'var(--primary)';
+                prompt.style.fontWeight = '600';
+                checkMeritInputs();
+            }
+        });
+    }
+
+    function checkMeritInputs() {
+        const capFile = meritCapZone.querySelector('input').files[0];
+        const jeeFile = meritJeeZone.querySelector('input').files[0];
+        meritProcessBtn.disabled = !(capFile && jeeFile);
+    }
+
+    if (meritCapZone) setupMeritZone(meritCapZone);
+    if (meritJeeZone) setupMeritZone(meritJeeZone);
+
+    if (meritProcessBtn) {
+        meritProcessBtn.addEventListener('click', async () => {
+            const capFile = meritCapZone.querySelector('input').files[0];
+            const jeeFile = meritJeeZone.querySelector('input').files[0];
+
+            const formData = new FormData();
+            formData.append("cap_pdf", capFile);
+            formData.append("jee_pdf", jeeFile);
+
+            meritProcessBtn.disabled = true;
+            meritProcessBtn.innerHTML = '<span class="loader"></span> Merging...';
+            meritProgressContainer.classList.remove('hidden');
+            meritResultsSection.classList.add('hidden');
+
+            const progressStage = document.getElementById('merit-progress-stage');
+            const progressPercent = document.getElementById('merit-progress-percent');
+            const progressFill = document.getElementById('merit-progress-bar-fill');
+            const progressMessage = document.getElementById('merit-progress-message');
+            const progressCount = document.getElementById('merit-progress-count');
+            const progressSpeed = document.getElementById('merit-progress-speed');
+            const progressEta = document.getElementById('merit-progress-eta');
+
+            const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000' : '';
+
+            // Listen to progress via SSE
+            const eventSource = new EventSource(`${API_BASE}/progress`);
+            
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    progressStage.innerText = data.stage;
+                    progressPercent.innerText = `${data.percent}%`;
+                    progressFill.style.width = `${data.percent}%`;
+                    progressMessage.innerText = data.message;
+
+                    if (data.total > 0) {
+                        progressCount.innerText = `${data.current}/${data.total}`;
+                        const now = Date.now() / 1000;
+                        const elapsed = now - data.start_time;
+                        if (elapsed > 0.5 && data.current > 0) {
+                            const speed = data.current / elapsed;
+                            progressSpeed.innerText = `${speed.toFixed(1)} p/s`;
+                            const remaining = data.total - data.current;
+                            const etaSeconds = remaining / speed;
+                            if (isFinite(etaSeconds)) {
+                                const m = Math.floor(etaSeconds / 60);
+                                const s = Math.floor(etaSeconds % 60);
+                                progressEta.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+                            }
+                        }
+                    }
+
+                    if (data.stage === "Completed" || data.stage === "Error") {
+                        eventSource.close();
+                    }
+                } catch (e) {
+                    console.error("Progress parse error", e);
+                }
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Upload failed");
+
+                const result = await response.json();
+                displayMeritResults(result);
+                showToast('Merge Successful', 'CAP & JEE data merged successfully.', 'check-circle');
+            } catch (error) {
+                showToast('Merge Error', error.message, 'alert');
+                progressStage.innerText = "Error";
+                progressMessage.innerText = error.message;
+            } finally {
+                meritProcessBtn.disabled = false;
+                meritProcessBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    Merge & Process Data
+                `;
+            }
+        });
+    }
+
+    function displayMeritResults(data) {
+        meritResultsSection.classList.remove('hidden');
+        document.getElementById('merit-total-count').innerText = data.summary.total_students;
+        document.getElementById('merit-matched-count').innerText = data.summary.matched_students;
+        const rate = ((data.summary.matched_students / data.summary.total_students) * 100).toFixed(1);
+        document.getElementById('merit-success-rate').innerText = `${rate}%`;
+
+        const downloadLink = document.getElementById('merit-download-link');
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8000' : '';
+        downloadLink.href = data.summary.download_url.startsWith('http') ? data.summary.download_url : `${API_BASE}${data.summary.download_url}`;
+
+        const body = document.getElementById('merit-results-body');
+        body.innerHTML = data.preview.map(row => `
+            <tr>
+                <td>${row.Merit_No || '-'}</td>
+                <td><strong>${row.Application_ID}</strong></td>
+                <td>${row.JEE_Name || '-'}</td>
+                <td>${row.JEE_Main_Percentile || '-'}</td>
+                <td>${row.MHT_CET_PCM_Total || '-'}</td>
+            </tr>
+        `).join('');
+
+        meritResultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
     console.log('DocuSmart App Initialized');
 });
 
