@@ -9,6 +9,7 @@
     --accent-glow: rgba(99, 102, 241, 0.15);
     --sidebar-width: 260px;
     --transition-speed: 0.3s;
+    --glass-blur: 20px;
 }
 
 * {
@@ -37,7 +38,7 @@ body {
 .sidebar {
     width: var(--sidebar-width);
     background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--glass-blur));
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -233,27 +234,109 @@ body {
     flex: 1;
     padding: 2.5rem;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
 }
 
 .content-section {
     display: none;
-    animation: fadeIn 0.4s ease-out;
 }
 
 .content-section.active {
     display: block;
+    animation: slideIn 220ms ease forwards;
 }
 
-@keyframes fadeIn {
+.content-section.exiting {
+    display: block;
+    animation: slideOut 220ms ease forwards;
+}
+
+@keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+/* Keyboard Shortcut Hint Bar */
+.shortcut-hint-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-color);
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem;
+    z-index: 2000;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.shortcut-hint-bar.dismissed {
+    transform: translateY(100%);
+}
+
+.shortcut-item {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.shortcut-key {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-family: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.close-hint-btn {
+    position: absolute;
+    right: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-hint-btn:hover {
+    color: var(--text-main);
+}
+
+@media (max-width: 1024px) {
+    .shortcut-hint-bar {
+        display: none;
     }
 }
 
@@ -364,7 +447,7 @@ body {
 
 .drop-zone {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--glass-blur));
     border: 2px dashed var(--border-color);
     border-radius: 24px;
     padding: 4rem 2rem;
@@ -433,7 +516,7 @@ body {
 
 .upload-panel {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--border-color);
     border-radius: 24px;
     padding: 2rem;
@@ -808,7 +891,7 @@ body {
 
 .category-card {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 1.5rem;
@@ -1170,7 +1253,7 @@ body {
 /* Workflow & Rule Builder Styles */
 .rule-builder {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 2rem;
@@ -1746,7 +1829,7 @@ input:checked+.slider:before {
     right: 0;
     width: 360px;
     background: rgba(30, 41, 59, 0.95);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--border-color);
     border-radius: 20px;
     box-shadow: var(--shadow-xl);
@@ -2030,19 +2113,112 @@ input:checked+.slider:before {
 
 /* Light Mode Override */
 body.light-mode {
-    --bg-dark: #f8fafc;
-    --bg-card: rgba(255, 255, 255, 0.8);
-    --border-color: rgba(0, 0, 0, 0.05);
-    --text-main: #0f172a;
+    --bg-dark: #f1f5f9;
+    --bg-card: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.08);
+    --text-main: #1e293b;
     --text-muted: #64748b;
+    --accent-glow: rgba(99, 102, 241, 0.1);
+    background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0, transparent 50%),
+        radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.05) 0, transparent 50%);
 }
 
-/* Responsiveness */
-.mobile-toggle {
+body.light-mode .sidebar {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+body.light-mode .top-bar {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+body.light-mode .nav-link:hover {
+    background: rgba(99, 102, 241, 0.08);
+}
+
+body.light-mode .logo-text {
+    background: linear-gradient(to right, #475569, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+body.light-mode .mobile-nav {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.low-confidence-badge {
+    background: #fdf2f2 !important;
+    color: #991b1b !important;
+    border: 1px solid #f87171 !important;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.threshold-warning {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #f59e0b;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Mobile bottom tab bar */
+.mobile-nav {
     display: none;
-    cursor: pointer;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(var(--glass-blur));
+    border-top: 1px solid var(--border-color);
+    padding: 0.75rem 0.5rem;
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
     color: var(--text-muted);
-    margin-right: 1.5rem;
+    text-decoration: none;
+    font-size: 0.625rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.mobile-nav-link svg {
+    margin-bottom: 2px;
+}
+
+.mobile-nav-link.active {
+    color: var(--primary-color);
 }
 
 @media (max-width: 1024px) {
@@ -2065,6 +2241,20 @@ body.light-mode {
 }
 
 @media (max-width: 768px) {
+    .sidebar {
+        display: none !important;
+    }
+
+    .mobile-nav {
+        display: flex;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding-bottom: 80px;
+        /* Space for mobile nav */
+    }
+
     .top-bar {
         padding: 1rem 1.5rem;
     }
@@ -2074,7 +2264,53 @@ body.light-mode {
     }
 
     .dashboard-stats {
+        grid-template: 1fr;
+    }
+
+    .dashboard-grid {
         grid-template-columns: 1fr;
+    }
+
+    .library-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .library-filters {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .upload-container {
+        padding: 1rem;
+    }
+
+    .drop-zone {
+        width: 100% !important;
+    }
+
+    .reports-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .report-card.full-width {
+        grid-column: span 1 !important;
+    }
+
+    .mobile-toggle {
+        display: none;
+        /* Hide toggle since sidebar is hidden */
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

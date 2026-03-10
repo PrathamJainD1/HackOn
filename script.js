@@ -1,10 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Global docStore initialization for early access
+    window.docStore = {
+        documents: [],
+        settings: {}
+    };
+
     // Navigation Logic
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.content-section');
 
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
     function handleNavigation(sectionId) {
-        // Update Nav Links
+        const currentActive = document.querySelector('.content-section.active');
+        const newActive = document.getElementById(sectionId);
+
+        if (!newActive || currentActive === newActive) return;
+
+        // Start exit animation for current section
+        if (currentActive) {
+            currentActive.classList.add('exiting');
+            currentActive.classList.remove('active');
+
+            // Wait for exit animation to complete before cleaning up
+            setTimeout(() => {
+                currentActive.classList.remove('exiting');
+            }, 220);
+        }
+
+        // Show new section
+        newActive.classList.add('active');
+
+        // Update Nav Links (Sidebar)
         navLinks.forEach(link => {
             if (link.getAttribute('data-section') === sectionId) {
                 link.classList.add('active');
@@ -13,19 +40,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update Sections
-        sections.forEach(section => {
-            if (section.id === sectionId) {
-                section.classList.add('active');
-                // Scroll main content to top on change
-                document.querySelector('.content-viewport').scrollTop = 0;
+        // Update Mobile Nav Links
+        mobileNavLinks.forEach(link => {
+            if (link.getAttribute('data-section') === sectionId) {
+                link.classList.add('active');
             } else {
-                section.classList.remove('active');
+                link.classList.remove('active');
             }
         });
 
+        // Scroll main content to top on change
+        const viewport = document.querySelector('.content-viewport');
+        if (viewport) viewport.scrollTop = 0;
+
         // Close mobile sidebar if open
-        document.getElementById('sidebar').classList.remove('mobile-active');
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.remove('mobile-active');
+
+        // Update hash without triggering hashchange again
+        if (window.location.hash !== `#${sectionId}`) {
+            history.pushState(null, null, `#${sectionId}`);
+        }
     }
 
     // Mobile Toggle Logic
@@ -37,6 +72,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ctrl + Key shortcuts
+        if (e.ctrlKey) {
+            if (e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                handleNavigation('dashboard');
+            } else if (e.key.toLowerCase() === 'u') {
+                e.preventDefault();
+                handleNavigation('upload');
+            } else if (e.key.toLowerCase() === 'l') {
+                e.preventDefault();
+                handleNavigation('library');
+            } else if (e.key === ',') {
+                e.preventDefault();
+                handleNavigation('settings');
+            }
+        }
+
+        // Global Escape key
+        if (e.key === 'Escape') {
+            // Close drawers and rule builder
+            if (notificationDrawer && notificationDrawer.classList.contains('active')) {
+                notificationDrawer.classList.remove('active');
+            }
+            const ruleBuilder = document.getElementById('rule-builder');
+            if (ruleBuilder && !ruleBuilder.classList.contains('hidden')) {
+                ruleBuilder.classList.add('hidden');
+            }
+        }
+    });
+
+    // Shortcut Hint Bar Logic
+    const shortcutBar = document.getElementById('shortcut-hint-bar');
+    const dismissShortcuts = document.getElementById('dismiss-shortcuts');
+    if (dismissShortcuts && shortcutBar) {
+        dismissShortcuts.addEventListener('click', () => {
+            shortcutBar.classList.add('dismissed');
+            localStorage.setItem('docusmart_shortcuts_dismissed', 'true');
+        });
+
+        // Check if previously dismissed
+        if (localStorage.getItem('docusmart_shortcuts_dismissed') === 'true') {
+            shortcutBar.classList.add('dismissed');
+        }
+    }
+
     // Global Loader Logic
     const loader = document.getElementById('global-loader');
     window.addEventListener('load', () => {
@@ -45,34 +127,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1200); // Branded delay for "premium" feel
     });
 
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey || e.metaKey) {
-            const key = e.key.toLowerCase();
-            if (key === 'd') { e.preventDefault(); location.hash = 'dashboard'; }
-            if (key === 'u') { e.preventDefault(); location.hash = 'upload'; }
-            if (key === 'l') { e.preventDefault(); location.hash = 'library'; }
-            if (key === ',') { e.preventDefault(); location.hash = 'settings'; }
-        }
-    });
+    // --- Settings Persistence & Initialization ---
+    const defaultSettings = {
+        lightMode: false,
+        glassIntensity: 20,
+        autoCategorize: true,
+        workflowNotifications: true,
+        ocrThreshold: 85
+    };
 
-    // Settings Panel Logic
+    // Load settings from localStorage or use defaults
+    const savedSettings = JSON.parse(localStorage.getItem('docuSmart_settings')) || defaultSettings;
+    window.docStore.settings = savedSettings;
+
+    function saveSettings() {
+        localStorage.setItem('docuSmart_settings', JSON.stringify(window.docStore.settings));
+    }
+
+    // Apply settings on load
+    if (window.docStore.settings.lightMode) document.body.classList.add('light-mode');
+    document.documentElement.style.setProperty('--glass-blur', `${window.docStore.settings.glassIntensity}px`);
+
+    // Settings UI Wiring
     const lightModeToggle = document.getElementById('setting-light-mode');
+    const glassSlider = document.getElementById('glass-intensity');
+    const autoCatToggle = document.getElementById('setting-auto-categorize');
+    const workflowNotifToggle = document.getElementById('setting-workflow-notif');
     const thresholdSlider = document.getElementById('confidence-threshold');
     const thresholdVal = document.getElementById('threshold-val');
 
+    // Set initial UI states
+    if (lightModeToggle) lightModeToggle.checked = window.docStore.settings.lightMode;
+    if (glassSlider) glassSlider.value = window.docStore.settings.glassIntensity * 5; // Simple scale 0-20 to 0-100
+    if (autoCatToggle) autoCatToggle.checked = window.docStore.settings.autoCategorize;
+    if (workflowNotifToggle) workflowNotifToggle.checked = window.docStore.settings.workflowNotifications;
+    if (thresholdSlider) {
+        thresholdSlider.value = window.docStore.settings.ocrThreshold;
+        thresholdVal.innerText = window.docStore.settings.ocrThreshold + '%';
+    }
+
     if (lightModeToggle) {
         lightModeToggle.addEventListener('change', (e) => {
+            window.docStore.settings.lightMode = e.target.checked;
             document.body.classList.toggle('light-mode', e.target.checked);
+            updateChartTheme(e.target.checked);
+            saveSettings();
             showToast('Theme Updated', `System switched to ${e.target.checked ? 'Light' : 'Dark'} mode.`, 'info');
+        });
+    }
+
+    function updateChartTheme(isLight) {
+        const textColor = isLight ? '#64748b' : 'rgba(255, 255, 255, 0.7)';
+        const borderColor = isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
+
+        Chart.defaults.color = textColor;
+        Chart.defaults.borderColor = borderColor;
+
+        // Force update all active charts
+        if (timelineChart) {
+            timelineChart.options.scales.x.grid.color = borderColor;
+            timelineChart.options.scales.y.grid.color = borderColor;
+            timelineChart.update();
+        }
+        if (categoryChart) {
+            categoryChart.options.scales.x.grid.color = borderColor;
+            categoryChart.options.scales.y.grid.color = borderColor;
+            categoryChart.update();
+        }
+        if (financialChart) financialChart.update();
+        if (dashboardDonutChart) dashboardDonutChart.update();
+    }
+
+    if (glassSlider) {
+        glassSlider.addEventListener('input', (e) => {
+            const intensity = e.target.value / 5; // Scale back to 0-20px
+            window.docStore.settings.glassIntensity = intensity;
+            document.documentElement.style.setProperty('--glass-blur', `${intensity}px`);
+        });
+        glassSlider.addEventListener('change', saveSettings);
+    }
+
+    if (autoCatToggle) {
+        autoCatToggle.addEventListener('change', (e) => {
+            window.docStore.settings.autoCategorize = e.target.checked;
+            saveSettings();
+        });
+    }
+
+    if (workflowNotifToggle) {
+        workflowNotifToggle.addEventListener('change', (e) => {
+            window.docStore.settings.workflowNotifications = e.target.checked;
+            saveSettings();
         });
     }
 
     if (thresholdSlider) {
         thresholdSlider.addEventListener('input', (e) => {
-            thresholdVal.innerText = e.target.value + '%';
+            const val = parseInt(e.target.value);
+            window.docStore.settings.ocrThreshold = val;
+            thresholdVal.innerText = val + '%';
+            if (typeof applyFilters === 'function') applyFilters(); // Re-render to update warning badges
         });
+        thresholdSlider.addEventListener('change', saveSettings);
     }
+
+
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -80,6 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const sectionId = link.getAttribute('data-section');
 
             // Push state to handle back/forward buttons
+            window.location.hash = sectionId;
+            handleNavigation(sectionId);
+        });
+    });
+
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = link.getAttribute('data-section');
             window.location.hash = sectionId;
             handleNavigation(sectionId);
         });
@@ -123,6 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileDateDisplay = document.getElementById('file-date');
     const previewThumbnail = document.getElementById('preview-thumbnail');
 
+    let currentFile;
+
     const cancelBtn = document.getElementById('cancel-btn');
     const processBtn = document.getElementById('process-btn');
 
@@ -165,6 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleFiles(files) {
         if (files.length > 0) {
             const file = files[0];
+            currentFile = file;
 
             // Validate file type
             const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
@@ -260,6 +431,65 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.value = '';
     });
 
+    // Function to get mock data based on file
+    function getMockData(file) {
+        const name = file.name.toLowerCase();
+        if (name.includes('invoice')) {
+            return [
+                { label: 'Document Type', value: 'Commercial Invoice', confidence: 'high' },
+                { label: 'Full Name', value: 'Alexander Wright', confidence: 'high' },
+                { label: 'Date', value: 'March 08, 2026', confidence: 'high' },
+                { label: 'Amount', value: '₹500.00 INR', confidence: 'medium' },
+                { label: 'Invoice Number', value: 'INV-2026-042', confidence: 'high' },
+                { label: 'Organization', value: 'NovaStream Technologies', confidence: 'high' },
+                { label: 'Summary', value: 'Service agreement for Q1 infrastructure maintenance and cloud optimization services.', confidence: 'medium', isSummary: true }
+            ];
+        } else if (name.includes('contract') || name.includes('agreement')) {
+            return [
+                { label: 'Document Type', value: 'Service Contract', confidence: 'high' },
+                { label: 'Agreement Type', value: 'Service Level Agreement', confidence: 'high' },
+                { label: 'Client', value: 'Apex Solutions', confidence: 'high' },
+                { label: 'Effective Date', value: 'Mar 02, 2026', confidence: 'high' },
+                { label: 'Term', value: '24 Months', confidence: 'medium' },
+                { label: 'Summary', value: 'Comprehensive service level agreement for IT support and maintenance.', confidence: 'medium', isSummary: true }
+            ];
+        } else if (name.includes('receipt')) {
+            return [
+                { label: 'Document Type', value: 'Business Receipt', confidence: 'high' },
+                { label: 'Vendor', value: 'Office Depot', confidence: 'high' },
+                { label: 'Total', value: '₹342.80', confidence: 'high' },
+                { label: 'Date', value: 'Mar 09, 2026', confidence: 'high' },
+                { label: 'Item', value: 'Ergonomic Chair', confidence: 'medium' },
+                { label: 'Summary', value: 'Purchase receipt for office supplies and equipment.', confidence: 'medium', isSummary: true }
+            ];
+        } else if (name.includes('id') || name.includes('passport')) {
+            return [
+                { label: 'Document Type', value: 'Passport/ID', confidence: 'high' },
+                { label: 'Full Name', value: 'James Wilson', confidence: 'high' },
+                { label: 'Document Number', value: 'P-992031B', confidence: 'high' },
+                { label: 'DOB', value: 'May 14, 1988', confidence: 'high' },
+                { label: 'Summary', value: 'Identification document with personal details.', confidence: 'medium', isSummary: true }
+            ];
+        } else if (name.includes('report')) {
+            return [
+                { label: 'Document Type', value: 'Financial Report', confidence: 'high' },
+                { label: 'Report Title', value: 'Q3 Annual Summary', confidence: 'high' },
+                { label: 'Fiscal Year', value: '2025', confidence: 'high' },
+                { label: 'Total Revenue', value: '₹180,000.00', confidence: 'high' },
+                { label: 'Auditor', value: 'Grant & Sons', confidence: 'medium' },
+                { label: 'Summary', value: 'Quarterly financial performance report.', confidence: 'medium', isSummary: true }
+            ];
+        } else {
+            // Default
+            return [
+                { label: 'Document Type', value: 'Document', confidence: 'medium' },
+                { label: 'File Name', value: file.name, confidence: 'high' },
+                { label: 'Date', value: new Date().toLocaleDateString(), confidence: 'high' },
+                { label: 'Summary', value: 'General document processed successfully.', confidence: 'medium', isSummary: true }
+            ];
+        }
+    }
+
     // Process Button click
     processBtn.addEventListener('click', () => {
         const resultsContainer = document.getElementById('extraction-results-container');
@@ -288,15 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
             previewThumbnail.classList.remove('processing');
             resultsContainer.classList.remove('hidden');
 
-            const mockData = [
-                { label: 'Document Type', value: 'Commercial Invoice', confidence: 'high' },
-                { label: 'Full Name', value: 'Alexander Wright', confidence: 'high' },
-                { label: 'Date', value: 'March 08, 2026', confidence: 'high' },
-                { label: 'Amount', value: '$1,450.00 USD', confidence: 'medium' },
-                { label: 'Invoice Number', value: 'INV-2026-042', confidence: 'high' },
-                { label: 'Organization', value: 'NovaStream Technologies', confidence: 'high' },
-                { label: 'Summary', value: 'Service agreement for Q1 infrastructure maintenance and cloud optimization services.', confidence: 'medium', isSummary: true }
-            ];
+            const mockData = getMockData(currentFile);
 
             displayExtractedData(mockData);
 
@@ -353,7 +575,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (item.label === 'Document Type') {
                 newDoc.type = item.value;
-                newDoc.category = autoCategorize(item.value, false); // Get category without showing toast yet
+                if (window.docStore.settings.autoCategorize) {
+                    newDoc.category = autoCategorize(item.value, false);
+                } else {
+                    newDoc.category = 'Uncategorized';
+                }
             }
             if (item.label === 'Amount') newDoc.amount = item.value;
             if (item.confidence === 'medium' || item.confidence === 'low') newDoc.confidence = item.confidence;
@@ -464,85 +690,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Document Library Data ---
-    let documents = [
-        {
-            id: 1,
-            name: 'Tesla-Leasing-Inv-09.pdf',
-            type: 'Commercial Invoice',
-            category: 'Invoices',
-            date: 'Mar 10, 2026',
-            amount: '$1,450.00',
-            confidence: 'high',
-            thumbnail: 'https://images.unsplash.com/photo-1554224155-169746ecde15?w=400&q=80',
-            extractedFields: [
-                { label: 'Merchant', value: 'Tesla Inc.', confidence: 'high' },
-                { label: 'Amount', value: '$1,450.00', confidence: 'high' },
-                { label: 'Invoice Date', value: 'Mar 10, 2026', confidence: 'high' },
-                { label: 'Account #', value: 'TX-992-B', confidence: 'medium' }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Executive-NDA-Final.docx',
-            type: 'Legal Contract',
-            category: 'Contracts',
-            date: 'Mar 08, 2026',
-            amount: '-',
-            confidence: 'high',
-            thumbnail: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&q=80',
-            extractedFields: [
-                { label: 'Agreement Type', value: 'Non-Disclosure Agreement', confidence: 'high' },
-                { label: 'Effective Date', value: 'Mar 08, 2026', confidence: 'high' },
-                { label: 'Party A', value: 'Global Ventures LLC', confidence: 'high' },
-                { label: 'Party B', value: 'Sarah Jenkins', confidence: 'high' }
-            ]
-        },
-        {
-            id: 3,
-            name: 'Starbucks-Receipt-NYC.png',
-            type: 'Business Receipt',
-            category: 'Receipts',
-            date: 'Mar 09, 2026',
-            amount: '$24.50',
-            confidence: 'high',
-            thumbnail: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=400&q=80',
-            extractedFields: [
-                { label: 'Vendor', value: 'Starbucks Coffee #288', confidence: 'high' },
-                { label: 'Total', value: '$24.50', confidence: 'high' },
-                { label: 'Items', value: '2x Latte, 1x Croissant', confidence: 'medium' }
-            ]
-        },
-        {
-            id: 4,
-            name: 'Identity-Pass-JohnDoe.jpg',
-            type: 'Government ID',
-            category: 'Identity',
-            date: 'Feb 20, 2026',
-            amount: '-',
-            confidence: 'high',
-            thumbnail: 'https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?w=400&q=80',
-            extractedFields: [
-                { label: 'Full Name', value: 'John J. Doe', confidence: 'high' },
-                { label: 'ID Number', value: 'A1B2C3D4E5', confidence: 'high' },
-                { label: 'Expiration', value: 'Dec 12, 2030', confidence: 'high' }
-            ]
-        },
-        {
-            id: 5,
-            name: 'Market-Analysis-Q1.pdf',
-            type: 'Research Report',
-            category: 'Reports',
-            date: 'Mar 05, 2026',
-            amount: '-',
-            confidence: 'medium',
-            thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80',
-            extractedFields: [
-                { label: 'Report Title', value: 'Global Market Dynamics Q1', confidence: 'medium' },
-                { label: 'Region', value: 'EMEA / APAC', confidence: 'high' },
-                { label: 'Confidentiality', value: 'Internal Use Only', confidence: 'high' }
-            ]
-        }
-    ];
+    let documents = [];
+
+    // Global docStore documents assignment
+    window.docStore.documents = documents;
 
     let currentView = 'grid'; // 'grid' or 'list'
 
@@ -720,6 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const listViewBtn = document.getElementById('list-view-btn');
 
     function renderLibrary(filteredDocs = documents) {
+        if (!libraryGrid) return;
         libraryGrid.innerHTML = '';
 
         if (filteredDocs.length === 0) {
@@ -738,6 +890,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const isPdf = doc.name.endsWith('.pdf');
             const isDocx = doc.name.endsWith('.docx');
 
+            // Threshold Logic
+            const confidenceVal = doc.confidence === 'high' ? 95 : (doc.confidence === 'medium' ? 70 : 40);
+            const isBelowThreshold = confidenceVal < window.docStore.settings.ocrThreshold;
+
+            if (isBelowThreshold) card.classList.add('low-confidence-card');
+
             let thumbContent = `<img src="${doc.thumbnail}" alt="${doc.name}">`;
             if (!doc.thumbnail) {
                 thumbContent = `
@@ -751,11 +909,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
+            const thresholdBadge = isBelowThreshold ? `
+                <div class="threshold-warning">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    </svg>
+                    Review Required
+                </div>
+            ` : '';
+
             card.innerHTML = `
                 <div class="doc-thumb">
                     ${thumbContent}
+                    ${thresholdBadge}
                     <div class="doc-badge-container">
-                        <span class="confidence-badge confidence-${doc.confidence}">${doc.confidence}</span>
+                        <span class="confidence-badge confidence-${doc.confidence} ${isBelowThreshold ? 'low-confidence-badge' : ''}">${doc.confidence}</span>
                     </div>
                 </div>
                 <div class="doc-content">
@@ -1005,6 +1173,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showAlertBanner(title, message) {
+        if (!window.docStore.settings.workflowNotifications) return;
+
         const container = document.getElementById('workflow-banner-container');
         const banner = document.createElement('div');
         banner.className = 'alert-banner';
@@ -1044,9 +1214,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctxCategory = document.getElementById('categoryChart').getContext('2d');
         const ctxFinancial = document.getElementById('financialChart').getContext('2d');
 
-        // General Chart Defaults for Dark Mode
-        Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        // General Chart Defaults based on current theme
+        const isLight = document.body.classList.contains('light-mode');
+        updateChartTheme(isLight);
 
         // Timeline Line Chart
         timelineChart = new Chart(ctxTimeline, {
@@ -1075,15 +1245,38 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateReports() {
         if (!timelineChart || !categoryChart || !financialChart) return;
 
-        // 1. Data for Timeline (Documents over time)
-        const dateCounts = {};
+        // 1. Data for Timeline (Documents over last 30 days)
+        const labels30Days = [];
+        const data30Days = [];
+        const dateMap = {};
+
+        // Prepare last 30 days
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const shortDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            labels30Days.push(shortDate);
+            dateMap[dateStr] = 0;
+        }
+
+        // Count docs by date
         documents.forEach(doc => {
-            const date = doc.date;
-            dateCounts[date] = (dateCounts[date] || 0) + 1;
+            if (dateMap[doc.date] !== undefined) {
+                dateMap[doc.date]++;
+            }
         });
-        const timelineLabels = Object.keys(dateCounts).sort((a, b) => new Date(a) - new Date(b));
-        timelineChart.data.labels = timelineLabels;
-        timelineChart.data.datasets[0].data = timelineLabels.map(l => dateCounts[l]);
+
+        // Fill data array
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            data30Days.push(dateMap[dateStr]);
+        }
+
+        timelineChart.data.labels = labels30Days;
+        timelineChart.data.datasets[0].data = data30Days;
         timelineChart.update();
 
         // 2. Data for Category Distribution
@@ -1103,50 +1296,122 @@ document.addEventListener('DOMContentLoaded', () => {
                 finTotals[doc.category] = (finTotals[doc.category] || 0) + val;
             }
         });
-        financialChart.data.labels = Object.keys(finTotals).map(c => `${c} ($)`);
+        financialChart.data.labels = Object.keys(finTotals); // Removed ($) from keys to keep it cleaner
         financialChart.data.datasets[0].data = Object.values(finTotals);
         financialChart.update();
     }
 
     // Report Download Logic
     downloadReportBtn.addEventListener('click', () => {
+        if (!timelineChart) initReports(); // Ensure charts are initialized
+
         const reportTitle = "DocuSmart System Report";
         const totalDocs = documents.length;
         const totalValue = documents.reduce((sum, d) => sum + (parseFloat(d.amount.replace(/[^0-9.]/g, '')) || 0), 0);
+
+        // Get Chart Snapshots
+        const timelineImg = timelineChart.toBase64Image();
+        const categoryImg = categoryChart.toBase64Image();
+        const financialImg = financialChart.toBase64Image();
 
         const htmlContent = `
             <!DOCTYPE html>
             <html>
             <head>
+                <meta charset="UTF-8">
                 <title>${reportTitle}</title>
                 <style>
-                    body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; background: #f8fafc; }
-                    .header { text-align: center; margin-bottom: 50px; }
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #1e293b; background: #f8fafc; line-height: 1.6; }
+                    .header { text-align: center; margin-bottom: 50px; border-bottom: 2px solid #6366f1; padding-bottom: 20px; }
+                    .header h1 { color: #6366f1; margin-bottom: 5px; }
+                    .header p { color: #64748b; margin: 0; }
                     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
-                    .stat-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
-                    .stat-value { font-size: 24px; font-weight: 700; color: #6366f1; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-                    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-                    th { background: #f1f5f9; }
+                    .stat-box { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+                    .stat-label { font-size: 0.875rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; }
+                    .stat-value { font-size: 2rem; font-weight: 800; color: #6366f1; }
+                    
+                    .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+                    .chart-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+                    .chart-card.full { grid-column: span 2; }
+                    .chart-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 1.125rem; }
+                    .chart-card img { width: 100%; height: auto; display: block; }
+                    
+                    .docs-heading { margin-top: 40px; display: flex; align-items: center; justify-content: space-between; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+                    th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+                    th { background: #6366f1; color: white; font-weight: 600; }
+                    tr:last-child td { border-bottom: none; }
+                    .timestamp { text-align: right; font-size: 0.875rem; color: #64748b; margin-top: 50px; }
                 </style>
             </head>
             <body>
                 <div class="header">
-                    <h1>DocuSmart Operations Report</h1>
-                    <p>Generated on ${new Date().toLocaleString()}</p>
+                    <h1>DocuSmart Analytics Report</h1>
+                    <p>Intelligence summary for your document workspace</p>
                 </div>
+                
                 <div class="stats-grid">
-                    <div class="stat-box"><div>Total Documents</div><div class="stat-value">${totalDocs}</div></div>
-                    <div class="stat-box"><div>Total Financial Value</div><div class="stat-value">$${totalValue.toFixed(2)}</div></div>
-                    <div class="stat-box"><div>Active Workflows</div><div class="stat-value">${workflowRules.filter(r => r.enabled).length}</div></div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Documents</div>
+                        <div class="stat-value">${totalDocs}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Extracted Value</div>
+                        <div class="stat-value">$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Workspace Rules</div>
+                        <div class="stat-value">${workflowRules.filter(r => r.enabled).length}</div>
+                    </div>
                 </div>
-                <h3>Recent Documents</h3>
-                <table>
-                    <thead><tr><th>Name</th><th>Type</th><th>Category</th><th>Amount</th><th>Date</th></tr></thead>
-                    <tbody>
-                        ${documents.slice(0, 10).map(d => `<tr><td>${d.name}</td><td>${d.type}</td><td>${d.category}</td><td>${d.amount}</td><td>${d.date}</td></tr>`).join('')}
-                    </tbody>
-                </table>
+
+                <div class="charts-section">
+                    <div class="chart-card full">
+                        <h3>Document Velocity (Last 30 Days)</h3>
+                        <img src="${timelineImg}" />
+                    </div>
+                    <div class="chart-card">
+                        <h3>Categorization Distribution</h3>
+                        <img src="${categoryImg}" />
+                    </div>
+                    <div class="chart-card">
+                        <h3>Financial Allocation</h3>
+                        <img src="${financialImg}" />
+                    </div>
+                </div>
+
+                <div class="docs-section">
+                    <div class="docs-heading">
+                        <h3>Full Workspace Inventory</h3>
+                        <span>Showing all ${totalDocs} documents</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Processing Date</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${documents.map(d => `
+                                <tr>
+                                    <td><strong>${d.name}</strong></td>
+                                    <td>${d.category}</td>
+                                    <td>${d.amount}</td>
+                                    <td>${d.date}</td>
+                                    <td>${d.confidence.toUpperCase()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="timestamp">
+                    Security Stamp: DOC-REP-${Math.random().toString(36).substr(2, 9).toUpperCase()} • Generated: ${new Date().toLocaleString()}
+                </div>
             </body>
             </html>
         `;
@@ -1155,13 +1420,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `DocuSmart_Report_${Date.now()}.html`;
+        a.download = `DocuSmart_Report_${new Date().toISOString().slice(0, 10)}.html`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
 
-        showToast('Report Generated', 'Your analysis report has been downloaded successfully.', 'check-circle');
+        showToast('Report Generated', 'Premium analysis report downloaded successfully.', 'check-circle');
     });
 
     // Update charts when reports section is shown
@@ -1175,6 +1439,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initDashboard() {
         const ctxDonut = document.getElementById('categoryDonutChart').getContext('2d');
+
+        // Apply theme colors
+        const isLight = document.body.classList.contains('light-mode');
+        updateChartTheme(isLight);
 
         dashboardDonutChart = new Chart(ctxDonut, {
             type: 'doughnut',
