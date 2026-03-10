@@ -11,9 +11,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
+    <div id="global-loader" class="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+            </div>
+            <div class="loader-text">DocuSmart</div>
+            <div class="loader-spinner"></div>
+        </div>
+    </div>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">
@@ -41,6 +54,7 @@
                         <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
                     <span>Dashboard</span>
+                    <span class="kb-hint">^D</span>
                 </a>
                 <a href="#upload" class="nav-link" data-section="upload">
                     <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -50,22 +64,24 @@
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
                     <span>Upload Documents</span>
+                    <span class="kb-hint">^U</span>
                 </a>
                 <a href="#library" class="nav-link" data-section="library">
                     <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                     </svg>
                     <span>Document Library</span>
+                    <span class="kb-hint">^L</span>
                 </a>
                 <a href="#extracted-data" class="nav-link" data-section="extracted-data">
                     <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="12" y1="18" x2="12" y2="12"></line>
-                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
                     <span>Extracted Data</span>
                 </a>
@@ -92,6 +108,17 @@
                     </svg>
                     <span>Reports</span>
                 </a>
+                <a href="#settings" class="nav-link" data-section="settings">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                    <span>Settings</span>
+                    <span class="kb-hint">^,</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -108,6 +135,14 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="top-bar">
+                <div class="mobile-toggle" id="mobile-toggle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </div>
                 <div class="header-search">
                     <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -117,13 +152,25 @@
                     <input type="text" placeholder="Search documents, data, or workflows..." aria-label="Search">
                 </div>
                 <div class="header-actions">
-                    <button class="action-btn" title="Notifications">
+                    <button class="action-btn" id="notification-trigger" title="Notifications">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                         </svg>
+                        <span class="notification-badge hidden" id="notification-badge">0</span>
                     </button>
+                    <!-- Notification Drawer -->
+                    <div class="notification-drawer" id="notification-drawer">
+                        <div class="drawer-header">
+                            <h3>Notifications</h3>
+                            <button id="clear-all-notifications" class="text-btn">Clear All</button>
+                        </div>
+                        <div class="drawer-content" id="notification-list">
+                            <!-- Notifications will be injected here -->
+                            <div class="empty-notifications">No new messages</div>
+                        </div>
+                    </div>
                     <button class="action-btn" title="Settings">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -143,8 +190,136 @@
                         <h1>Dashboard</h1>
                         <p>Welcome back! Here's what's happening with your documents today.</p>
                     </div>
-                    <div class="placeholder-grid">
-                        <!-- Dashboard content will go here -->
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                            </div>
+                            <div class="stat-details">
+                                <h3 id="stat-total-docs" class="stat-number">0</h3>
+                                <p class="stat-label">Total Documents</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="stat-details">
+                                <h3 id="stat-weekly-docs" class="stat-number">0</h3>
+                                <p class="stat-label">Documents This Week</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <div class="stat-details">
+                                <h3 id="stat-total-amount" class="stat-number">$0</h3>
+                                <p class="stat-label">Total Extracted</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                            </div>
+                            <div class="stat-details">
+                                <h3 id="stat-active-workflows" class="stat-number">0</h3>
+                                <p class="stat-label">Active Workflows</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div class="stat-details">
+                                <h3 id="stat-categories-used" class="stat-number">0</h3>
+                                <p class="stat-label">Categories Used</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dashboard-main">
+                            <div class="activity-section">
+                                <div class="section-title">
+                                    <h3>Recent Activity</h3>
+                                    <a href="#library" class="view-all-link">View All</a>
+                                </div>
+                                <div id="recent-activity-feed" class="activity-feed">
+                                    <!-- Activity items will be injected here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-sidebar">
+                            <div class="quick-actions-section">
+                                <h3>Quick Actions</h3>
+                                <div class="quick-actions-grid">
+                                    <button class="action-btn-premium"
+                                        onclick="window.location.hash='#upload'; document.querySelector('a[href=\'#upload\']').click();">
+                                        <div class="action-icon" style="background: #6366f1;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <span>Upload Doc</span>
+                                    </button>
+                                    <button class="action-btn-premium"
+                                        onclick="window.location.hash='#workflows'; document.querySelector('a[href=\'#workflows\']').click();">
+                                        <div class="action-icon" style="background: #a855f7;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <span>Run Workflow</span>
+                                    </button>
+                                    <button class="action-btn-premium"
+                                        onclick="window.location.hash='#reports'; document.querySelector('a[href=\'#reports\']').click();">
+                                        <div class="action-icon" style="background: #ec4899;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                                            </svg>
+                                        </div>
+                                        <span>Generate Report</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="category-summary-card">
+                                <h3>Category Split</h3>
+                                <div class="donut-container">
+                                    <canvas id="categoryDonutChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -341,10 +516,62 @@
                 <!-- Extracted Data Section -->
                 <section id="extracted-data" class="content-section">
                     <div class="section-header">
-                        <h1>Extracted Data</h1>
-                        <p>Review and export data automatically captured from your documents.</p>
+                        <div class="header-main">
+                            <h1>Extracted Data</h1>
+                            <p>Review and export data automatically captured from your documents.</p>
+                        </div>
+                        <div class="header-actions-group">
+                            <div class="search-input-wrapper">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" id="extracted-search" placeholder="Search fields or values...">
+                            </div>
+                            <button class="primary-btn" id="export-csv-btn" style="width: auto;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Export CSV
+                            </button>
+                        </div>
                     </div>
-                    <div class="placeholder-grid"></div>
+
+                    <div class="extracted-data-container">
+                        <div class="data-table-wrapper" id="extracted-data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Document</th>
+                                        <th>Doc Type</th>
+                                        <th>Field Name</th>
+                                        <th>Extracted Value</th>
+                                        <th>Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="extracted-data-tbody">
+                                    <!-- Rows will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="extracted-empty-state" class="empty-state hidden">
+                            <div class="empty-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h3>No extracted data found</h3>
+                            <p>Processed documents will show their captured fields here.</p>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Categories Section -->
@@ -510,10 +737,117 @@
                 <!-- Reports Section -->
                 <section id="reports" class="content-section">
                     <div class="section-header">
-                        <h1>Reports</h1>
-                        <p>Insightful analytics and trends on document processing and data.</p>
+                        <div class="header-main">
+                            <h1>Advanced Reports</h1>
+                            <p>Dynamic analytics and visual trends from your document data pipeline.</p>
+                        </div>
+                        <button class="primary-btn" id="download-report-btn" style="width: auto;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download Report
+                        </button>
                     </div>
-                    <div class="placeholder-grid"></div>
+
+                    <div class="reports-grid">
+                        <div class="report-card full-width">
+                            <div class="report-header">
+                                <h3>Document Timeline</h3>
+                                <p>Volume of documents processed over the last 30 days</p>
+                            </div>
+                            <div class="chart-container timeline-chart">
+                                <canvas id="timelineChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="report-card">
+                            <div class="report-header">
+                                <h3>Category Distribution</h3>
+                                <p>Counts by document category</p>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="report-card">
+                            <div class="report-header">
+                                <h3>Financial Insights</h3>
+                                <p>Total expenses by category (Extracted Amounts)</p>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="financialChart"></canvas>
+                            </div>
+                        </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="content-section">
+                    <div class="section-header">
+                        <h1>System Settings</h1>
+                        <p>Configure theme, automation preferences, and AI processing parameters.</p>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Theme & Interface</h3>
+                            <div class="settings-item">
+                                <div class="item-info">
+                                    <span class="item-title">Light Mode</span>
+                                    <span class="item-desc">Switch to a brighter interface theme.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-light-mode">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="settings-item">
+                                <div class="item-info">
+                                    <span class="item-title">Glassmorphism Intensity</span>
+                                    <span class="item-desc">Adjust the background blur strength.</span>
+                                </div>
+                                <input type="range" min="0" max="100" value="70" class="range-slider">
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Automation Preferences</h3>
+                            <div class="settings-item">
+                                <div class="item-info">
+                                    <span class="item-title">Auto-Categorization</span>
+                                    <span class="item-desc">Automatically assign categories to new docs.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="setting-auto-categorize">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="settings-item">
+                                <div class="item-info">
+                                    <span class="item-title">Workflow Notifications</span>
+                                    <span class="item-desc">Show banners for active workflow rules.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="setting-workflow-notif">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>AI Processing (OCR)</h3>
+                            <div class="settings-item slider-item">
+                                <div class="item-info">
+                                    <span class="item-title">OCR Confidence Threshold</span>
+                                    <span class="item-desc">Flag documents below <b id="threshold-val">85%</b>
+                                        confidence.</span>
+                                </div>
+                                <input type="range" id="confidence-threshold" min="30" max="95" value="85"
+                                    class="range-slider">
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </main>

@@ -17,9 +17,60 @@ document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(section => {
             if (section.id === sectionId) {
                 section.classList.add('active');
+                // Scroll main content to top on change
+                document.querySelector('.content-viewport').scrollTop = 0;
             } else {
                 section.classList.remove('active');
             }
+        });
+
+        // Close mobile sidebar if open
+        document.getElementById('sidebar').classList.remove('mobile-active');
+    }
+
+    // Mobile Toggle Logic
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const sidebar = document.getElementById('sidebar');
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-active');
+        });
+    }
+
+    // Global Loader Logic
+    const loader = document.getElementById('global-loader');
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            loader.classList.add('hidden');
+        }, 1200); // Branded delay for "premium" feel
+    });
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            const key = e.key.toLowerCase();
+            if (key === 'd') { e.preventDefault(); location.hash = 'dashboard'; }
+            if (key === 'u') { e.preventDefault(); location.hash = 'upload'; }
+            if (key === 'l') { e.preventDefault(); location.hash = 'library'; }
+            if (key === ',') { e.preventDefault(); location.hash = 'settings'; }
+        }
+    });
+
+    // Settings Panel Logic
+    const lightModeToggle = document.getElementById('setting-light-mode');
+    const thresholdSlider = document.getElementById('confidence-threshold');
+    const thresholdVal = document.getElementById('threshold-val');
+
+    if (lightModeToggle) {
+        lightModeToggle.addEventListener('change', (e) => {
+            document.body.classList.toggle('light-mode', e.target.checked);
+            showToast('Theme Updated', `System switched to ${e.target.checked ? 'Light' : 'Dark'} mode.`, 'info');
+        });
+    }
+
+    if (thresholdSlider) {
+        thresholdSlider.addEventListener('input', (e) => {
+            thresholdVal.innerText = e.target.value + '%';
         });
     }
 
@@ -269,7 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
             amount: '-',
             confidence: 'high',
-            thumbnail: previewThumbnail.querySelector('img') ? previewThumbnail.querySelector('img').src : null
+            thumbnail: previewThumbnail.querySelector('img') ? previewThumbnail.querySelector('img').src : null,
+            extractedFields: []
         };
 
         for (const item of data) {
@@ -295,6 +347,10 @@ document.addEventListener('DOMContentLoaded', () => {
             await typeText(document.getElementById(`field-${item.label.replace(/\s+/g, '-').toLowerCase()}`), item.value);
 
             // Map data to newDoc for library
+            if (!item.isSummary) {
+                newDoc.extractedFields.push({ label: item.label, value: item.value, confidence: item.confidence });
+            }
+
             if (item.label === 'Document Type') {
                 newDoc.type = item.value;
                 newDoc.category = autoCategorize(item.value, false); // Get category without showing toast yet
@@ -309,10 +365,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add to library and notify
         documents.unshift(newDoc);
         renderLibrary();
+        renderExtractedData(); // Refresh the extracted data panel
+        renderCategories(); // Update category counts and previews
         showToast('Processing Complete', `<b>${newDoc.name}</b> has been added to your Library.`, 'check-circle');
+        addNotification('process', `Document <b>${newDoc.name}</b> processed and added to library.`);
 
         // Trigger automated workflows
         checkWorkflows(newDoc);
+
+        // Update reports if active
+        updateReports();
+
+        // Update dashboard if active
+        updateDashboard();
     }
 
     function autoCategorize(docType, showNotify = true) {
@@ -333,6 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 countElement.innerText = `${currentCount + 1} Documents`;
             }
             showToast('Auto-Categorized', `Smart AI assigned this document to <b>${category}</b>.`, 'check-circle');
+            addNotification('info', `Document auto-categorized under <b>${category}</b>.`);
         }
 
         return category;
@@ -401,47 +467,246 @@ document.addEventListener('DOMContentLoaded', () => {
     let documents = [
         {
             id: 1,
-            name: 'Inv-Nov-Tech-102.pdf',
+            name: 'Tesla-Leasing-Inv-09.pdf',
             type: 'Commercial Invoice',
             category: 'Invoices',
-            date: 'Mar 02, 2026',
-            amount: '$2,850.00',
+            date: 'Mar 10, 2026',
+            amount: '$1,450.00',
             confidence: 'high',
-            thumbnail: 'https://images.unsplash.com/photo-1554224155-169746ecde15?w=400&auto=format&fit=crop&q=60'
+            thumbnail: 'https://images.unsplash.com/photo-1554224155-169746ecde15?w=400&q=80',
+            extractedFields: [
+                { label: 'Merchant', value: 'Tesla Inc.', confidence: 'high' },
+                { label: 'Amount', value: '$1,450.00', confidence: 'high' },
+                { label: 'Invoice Date', value: 'Mar 10, 2026', confidence: 'high' },
+                { label: 'Account #', value: 'TX-992-B', confidence: 'medium' }
+            ]
         },
         {
             id: 2,
-            name: 'Service-Agreement-Q1.docx',
-            type: 'Service Agreement',
+            name: 'Executive-NDA-Final.docx',
+            type: 'Legal Contract',
             category: 'Contracts',
-            date: 'Feb 28, 2026',
+            date: 'Mar 08, 2026',
             amount: '-',
             confidence: 'high',
-            thumbnail: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&auto=format&fit=crop&q=60'
+            thumbnail: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&q=80',
+            extractedFields: [
+                { label: 'Agreement Type', value: 'Non-Disclosure Agreement', confidence: 'high' },
+                { label: 'Effective Date', value: 'Mar 08, 2026', confidence: 'high' },
+                { label: 'Party A', value: 'Global Ventures LLC', confidence: 'high' },
+                { label: 'Party B', value: 'Sarah Jenkins', confidence: 'high' }
+            ]
         },
         {
             id: 3,
-            name: 'Quarterly-Report.pdf',
-            type: 'Financial Report',
+            name: 'Starbucks-Receipt-NYC.png',
+            type: 'Business Receipt',
+            category: 'Receipts',
+            date: 'Mar 09, 2026',
+            amount: '$24.50',
+            confidence: 'high',
+            thumbnail: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=400&q=80',
+            extractedFields: [
+                { label: 'Vendor', value: 'Starbucks Coffee #288', confidence: 'high' },
+                { label: 'Total', value: '$24.50', confidence: 'high' },
+                { label: 'Items', value: '2x Latte, 1x Croissant', confidence: 'medium' }
+            ]
+        },
+        {
+            id: 4,
+            name: 'Identity-Pass-JohnDoe.jpg',
+            type: 'Government ID',
+            category: 'Identity',
+            date: 'Feb 20, 2026',
+            amount: '-',
+            confidence: 'high',
+            thumbnail: 'https://images.unsplash.com/photo-1534353436294-0dbd4bdac845?w=400&q=80',
+            extractedFields: [
+                { label: 'Full Name', value: 'John J. Doe', confidence: 'high' },
+                { label: 'ID Number', value: 'A1B2C3D4E5', confidence: 'high' },
+                { label: 'Expiration', value: 'Dec 12, 2030', confidence: 'high' }
+            ]
+        },
+        {
+            id: 5,
+            name: 'Market-Analysis-Q1.pdf',
+            type: 'Research Report',
             category: 'Reports',
             date: 'Mar 05, 2026',
             amount: '-',
             confidence: 'medium',
-            thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&auto=format&fit=crop&q=60'
-        },
-        {
-            id: 4,
-            name: 'Amazon-Receipt-201.png',
-            type: 'Receipt',
-            category: 'Receipts',
-            date: 'Mar 09, 2026',
-            amount: '$42.99',
-            confidence: 'high',
-            thumbnail: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=400&auto=format&fit=crop&q=60'
+            thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80',
+            extractedFields: [
+                { label: 'Report Title', value: 'Global Market Dynamics Q1', confidence: 'medium' },
+                { label: 'Region', value: 'EMEA / APAC', confidence: 'high' },
+                { label: 'Confidentiality', value: 'Internal Use Only', confidence: 'high' }
+            ]
         }
     ];
 
     let currentView = 'grid'; // 'grid' or 'list'
+
+    // --- Extracted Data Panel Logic ---
+    const extractedDataTbody = document.getElementById('extracted-data-tbody');
+    const extractedSearchInput = document.getElementById('extracted-search');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
+    const extractedEmptyState = document.getElementById('extracted-empty-state');
+    const dataTableWrapper = document.getElementById('extracted-data-table-wrapper');
+
+    function renderExtractedData(query = '') {
+        if (!extractedDataTbody) return;
+
+        extractedDataTbody.innerHTML = '';
+        let allFields = [];
+
+        documents.forEach(doc => {
+            if (doc.extractedFields) {
+                doc.extractedFields.forEach(field => {
+                    allFields.push({
+                        docName: doc.name,
+                        docType: doc.type,
+                        label: field.label,
+                        value: field.value,
+                        confidence: field.confidence
+                    });
+                });
+            }
+        });
+
+        const filteredFields = allFields.filter(f =>
+            f.label.toLowerCase().includes(query.toLowerCase()) ||
+            f.value.toLowerCase().includes(query.toLowerCase()) ||
+            f.docName.toLowerCase().includes(query.toLowerCase())
+        );
+
+        if (filteredFields.length === 0) {
+            dataTableWrapper.classList.add('hidden');
+            extractedEmptyState.classList.remove('hidden');
+            return;
+        }
+
+        dataTableWrapper.classList.remove('hidden');
+        extractedEmptyState.classList.add('hidden');
+
+        filteredFields.forEach(field => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="doc-name-cell">${field.docName}</td>
+                <td>${field.docType}</td>
+                <td class="field-label-cell">${field.label}</td>
+                <td class="extracted-value-cell">${field.value}</td>
+                <td><span class="confidence-badge confidence-${field.confidence}">${field.confidence}</span></td>
+            `;
+            extractedDataTbody.appendChild(row);
+        });
+    }
+
+    // --- Categories Panel Logic ---
+    const CATEGORIES_CONFIG = [
+        { id: 'Invoices', label: 'Finance', color: '#f59e0b', colorRgb: '245, 158, 11', icon: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z' },
+        { id: 'Contracts', label: 'Legal', color: '#10b981', colorRgb: '16, 185, 129', icon: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z' },
+        { id: 'Reports', label: 'Business', color: '#3b82f6', colorRgb: '59, 130, 246', icon: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z' },
+        { id: 'Identity', label: 'Personal', color: '#8b5cf6', colorRgb: '139, 92, 246', icon: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z' },
+        { id: 'Receipts', label: 'Operations', color: '#ec4899', colorRgb: '236, 72, 153', icon: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z' }
+    ];
+
+    const categoriesGrid = document.getElementById('categories-grid');
+
+    function renderCategories() {
+        if (!categoriesGrid) return;
+        categoriesGrid.innerHTML = '';
+
+        CATEGORIES_CONFIG.forEach(cat => {
+            const catDocs = documents.filter(d => d.category === cat.id);
+            const count = catDocs.length;
+            const recentDocs = catDocs.slice(0, 2);
+
+            const card = document.createElement('div');
+            card.className = 'category-card';
+            card.style.setProperty('--category-color', cat.color);
+            card.style.setProperty('--category-color-rgb', cat.colorRgb);
+            card.setAttribute('data-category', cat.id);
+
+            let previewHtml = '';
+            if (recentDocs.length > 0) {
+                previewHtml = `
+                    <div class="category-preview-strip">
+                        <span class="preview-tag">Recent Files</span>
+                        ${recentDocs.map(d => `<div class="preview-item">${d.name}</div>`).join('')}
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                <svg class="folder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="${cat.icon}"></path>
+                </svg>
+                <div class="category-info">
+                    <span class="category-name">${cat.id}</span>
+                    <span class="category-count">${count} Document${count !== 1 ? 's' : ''}</span>
+                </div>
+                <span class="category-label">${cat.label}</span>
+                ${previewHtml}
+            `;
+
+            card.addEventListener('click', () => {
+                // Navigate to library
+                window.location.hash = 'library';
+                handleNavigation('library');
+
+                // Set filter
+                const catFilter = document.getElementById('filter-category');
+                if (catFilter) {
+                    catFilter.value = cat.id;
+                    applyFilters(); // Trigger renderLibrary
+                }
+            });
+
+            categoriesGrid.appendChild(card);
+        });
+    }
+
+    if (extractedSearchInput) {
+        ['input', 'keyup', 'change'].forEach(evt => {
+            extractedSearchInput.addEventListener(evt, (e) => {
+                renderExtractedData(e.target.value);
+            });
+        });
+    }
+
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', () => {
+            let csvContent = "Document,Doc Type,Field,Value,Confidence\n";
+            documents.forEach(doc => {
+                if (doc.extractedFields) {
+                    doc.extractedFields.forEach(field => {
+                        const row = [
+                            `"${doc.name}"`,
+                            `"${doc.type}"`,
+                            `"${field.label}"`,
+                            `"${field.value}"`,
+                            `"${field.confidence}"`
+                        ].join(",");
+                        csvContent += row + "\n";
+                    });
+                }
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `extracted_data_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Export Complete', 'Extracted data downloaded as CSV.', 'check-circle');
+        });
+    }
+
+    // Call initially
+    renderExtractedData();
+    renderCategories();
 
     // --- Library Elements ---
     const libraryGrid = document.getElementById('library-grid');
@@ -728,10 +993,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             if (rule.action === 'alert') {
                 showAlertBanner('Workflow Alert Triggered', `High-priority rule matched for <b>${doc.name}</b>. Action: Notification sent.`);
+                addNotification('alert', `High-priority alert triggered for <b>${doc.name}</b>.`);
             } else if (rule.action === 'summarize') {
                 showToast('AI Action', `Workflow generating summary for <b>${doc.name}</b>...`, 'info');
+                addNotification('workflow', `AI Summary workflow started for <b>${doc.name}</b>.`);
             } else {
                 showToast('Workflow Action', `Rule "${rule.title}" executing for <b>${doc.name}</b>.`, 'info');
+                addNotification('workflow', `Workflow "${rule.title}" executed for <b>${doc.name}</b>.`);
             }
         }, 1000);
     }
@@ -766,8 +1034,353 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 8000);
     }
 
+    // --- Reports & Analytics System ---
+    let timelineChart, categoryChart, financialChart;
+
+    const downloadReportBtn = document.getElementById('download-report-btn');
+
+    function initReports() {
+        const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
+        const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+        const ctxFinancial = document.getElementById('financialChart').getContext('2d');
+
+        // General Chart Defaults for Dark Mode
+        Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+        // Timeline Line Chart
+        timelineChart = new Chart(ctxTimeline, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Processed Documents', data: [], borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.2)', fill: true, tension: 0.4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Category Bar Chart
+        categoryChart = new Chart(ctxCategory, {
+            type: 'bar',
+            data: { labels: [], datasets: [{ data: [], backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f97316', '#22c55e', '#64748b'], borderRadius: 10 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // Financial Pie Chart
+        financialChart = new Chart(ctxFinancial, {
+            type: 'pie',
+            data: { labels: [], datasets: [{ data: [], backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f97316', '#22c55e'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+
+        updateReports();
+    }
+
+    function updateReports() {
+        if (!timelineChart || !categoryChart || !financialChart) return;
+
+        // 1. Data for Timeline (Documents over time)
+        const dateCounts = {};
+        documents.forEach(doc => {
+            const date = doc.date;
+            dateCounts[date] = (dateCounts[date] || 0) + 1;
+        });
+        const timelineLabels = Object.keys(dateCounts).sort((a, b) => new Date(a) - new Date(b));
+        timelineChart.data.labels = timelineLabels;
+        timelineChart.data.datasets[0].data = timelineLabels.map(l => dateCounts[l]);
+        timelineChart.update();
+
+        // 2. Data for Category Distribution
+        const catCounts = {};
+        documents.forEach(doc => {
+            catCounts[doc.category] = (catCounts[doc.category] || 0) + 1;
+        });
+        categoryChart.data.labels = Object.keys(catCounts);
+        categoryChart.data.datasets[0].data = Object.values(catCounts);
+        categoryChart.update();
+
+        // 3. Data for Financial Insights (Amounts by Category)
+        const finTotals = {};
+        documents.forEach(doc => {
+            if (doc.amount && doc.amount !== '-') {
+                const val = parseFloat(doc.amount.replace(/[^0-9.]/g, '')) || 0;
+                finTotals[doc.category] = (finTotals[doc.category] || 0) + val;
+            }
+        });
+        financialChart.data.labels = Object.keys(finTotals).map(c => `${c} ($)`);
+        financialChart.data.datasets[0].data = Object.values(finTotals);
+        financialChart.update();
+    }
+
+    // Report Download Logic
+    downloadReportBtn.addEventListener('click', () => {
+        const reportTitle = "DocuSmart System Report";
+        const totalDocs = documents.length;
+        const totalValue = documents.reduce((sum, d) => sum + (parseFloat(d.amount.replace(/[^0-9.]/g, '')) || 0), 0);
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${reportTitle}</title>
+                <style>
+                    body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; background: #f8fafc; }
+                    .header { text-align: center; margin-bottom: 50px; }
+                    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
+                    .stat-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+                    .stat-value { font-size: 24px; font-weight: 700; color: #6366f1; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+                    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+                    th { background: #f1f5f9; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>DocuSmart Operations Report</h1>
+                    <p>Generated on ${new Date().toLocaleString()}</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box"><div>Total Documents</div><div class="stat-value">${totalDocs}</div></div>
+                    <div class="stat-box"><div>Total Financial Value</div><div class="stat-value">$${totalValue.toFixed(2)}</div></div>
+                    <div class="stat-box"><div>Active Workflows</div><div class="stat-value">${workflowRules.filter(r => r.enabled).length}</div></div>
+                </div>
+                <h3>Recent Documents</h3>
+                <table>
+                    <thead><tr><th>Name</th><th>Type</th><th>Category</th><th>Amount</th><th>Date</th></tr></thead>
+                    <tbody>
+                        ${documents.slice(0, 10).map(d => `<tr><td>${d.name}</td><td>${d.type}</td><td>${d.category}</td><td>${d.amount}</td><td>${d.date}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `DocuSmart_Report_${Date.now()}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('Report Generated', 'Your analysis report has been downloaded successfully.', 'check-circle');
+    });
+
+    // Update charts when reports section is shown
+    document.querySelector('a[href="#reports"]').addEventListener('click', () => {
+        if (!timelineChart) initReports();
+        else updateReports();
+    });
+
+    // --- Dashboard & Activity System ---
+    let dashboardDonutChart;
+
+    function initDashboard() {
+        const ctxDonut = document.getElementById('categoryDonutChart').getContext('2d');
+
+        dashboardDonutChart = new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: { labels: [], datasets: [{ data: [], backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#f97316', '#22c55e'], borderWidth: 0, hoverOffset: 10 }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: { legend: { display: false }, tooltip: { enabled: true } }
+            }
+        });
+
+        updateDashboard();
+    }
+
+    function updateDashboard() {
+        if (!dashboardDonutChart) return;
+
+        // 1. Calculate Stats
+        const totalDocs = documents.length;
+        const totalValue = documents.reduce((sum, d) => sum + (parseFloat(d.amount.replace(/[^0-9.]/g, '')) || 0), 0);
+        const weeklyDocs = documents.filter(d => {
+            const docDate = new Date(d.date);
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return docDate >= weekAgo;
+        }).length;
+        const activeWorkflows = workflowRules.filter(r => r.enabled).length;
+        const categoriesCount = new Set(documents.map(d => d.category)).size;
+
+        // 2. Animate Numbers
+        animateValue("stat-total-docs", 0, totalDocs, 1000);
+        animateValue("stat-weekly-docs", 0, weeklyDocs, 1000);
+        animateValue("stat-total-amount", 0, totalValue, 1000, true);
+        animateValue("stat-active-workflows", 0, activeWorkflows, 1000);
+        animateValue("stat-categories-used", 0, categoriesCount, 1000);
+
+        // 3. Update Donut Chart
+        const catCounts = {};
+        documents.forEach(doc => {
+            catCounts[doc.category] = (catCounts[doc.category] || 0) + 1;
+        });
+        dashboardDonutChart.data.labels = Object.keys(catCounts);
+        dashboardDonutChart.data.datasets[0].data = Object.values(catCounts);
+        dashboardDonutChart.update();
+
+        // 4. Update Activity Feed
+        const activityFeed = document.getElementById('recent-activity-feed');
+        activityFeed.innerHTML = '';
+
+        documents.slice(0, 5).forEach(doc => {
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+
+            const isPdf = doc.name.endsWith('.pdf');
+
+            item.innerHTML = `
+                <div class="activity-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="activity-info">
+                    <h4>${doc.name}</h4>
+                    <div class="activity-meta">Processed ${doc.date} • ${doc.type}</div>
+                </div>
+                <div class="activity-badge" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                    ${doc.category}
+                </div>
+            `;
+            activityFeed.appendChild(item);
+        });
+    }
+
+    function animateValue(id, start, end, duration, isCurrency = false) {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = progress * (end - start) + start;
+
+            if (isCurrency) {
+                obj.innerHTML = "$" + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                obj.innerHTML = Math.floor(value).toLocaleString();
+            }
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Nav trigger for dashboard
+    document.querySelector('a[href="#dashboard"]').addEventListener('click', () => {
+        if (!dashboardDonutChart) initDashboard();
+        else updateDashboard();
+    });
+
+    // Initialize dashboard on load if it's the active section
+    if (window.location.hash === '#dashboard' || !window.location.hash) {
+        initDashboard();
+    }
+
+    // --- Notifications Alert Center System ---
+    let notifications = [
+        { id: 1, type: 'process', msg: 'System initialized and ready for document processing.', time: '10 mins ago', unread: false },
+        { id: 2, type: 'info', msg: 'AI models updated to v2.4 (Improved Invoice extraction).', time: '1 hour ago', unread: true }
+    ];
+
+    const notificationTrigger = document.getElementById('notification-trigger');
+    const notificationDrawer = document.getElementById('notification-drawer');
+    const notificationBadge = document.getElementById('notification-badge');
+    const notificationList = document.getElementById('notification-list');
+    const clearAllNotifBtn = document.getElementById('clear-all-notifications');
+
+    function addNotification(type, msg) {
+        const id = Date.now();
+        const time = 'Just now';
+        notifications.unshift({ id, type, msg, time, unread: true });
+        renderNotifications();
+        updateNotificationBadge();
+    }
+
+    function renderNotifications() {
+        if (notifications.length === 0) {
+            notificationList.innerHTML = '<div class="empty-notifications">No new messages</div>';
+            return;
+        }
+
+        notificationList.innerHTML = notifications.map(notif => {
+            let iconColor, iconSvg;
+            if (notif.type === 'process') { iconColor = '#6366f1'; iconSvg = '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>'; }
+            else if (notif.type === 'workflow') { iconColor = '#a855f7'; iconSvg = '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>'; }
+            else if (notif.type === 'alert') { iconColor = '#ef4444'; iconSvg = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>'; }
+            else { iconColor = '#64748b'; iconSvg = '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'; }
+
+            return `
+                <div class="notification-item ${notif.unread ? 'unread' : ''}" data-id="${notif.id}">
+                    <div class="notif-icon" style="background: ${iconColor}22; color: ${iconColor};">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${iconSvg}</svg>
+                    </div>
+                    <div class="notif-details">
+                        <div class="notif-msg">${notif.msg}</div>
+                        <div class="notif-time">${notif.time}</div>
+                    </div>
+                    ${notif.unread ? `<div class="mark-read-btn" title="Mark as Read"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg></div>` : ''}
+                </div>
+            `;
+        }).join('');
+
+        // Attach listeners to mark-read buttons
+        document.querySelectorAll('.mark-read-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.closest('.notification-item').dataset.id);
+                markAsRead(id);
+            });
+        });
+    }
+
+    function updateNotificationBadge() {
+        const unreadCount = notifications.filter(n => n.unread).length;
+        if (unreadCount > 0) {
+            notificationBadge.innerText = unreadCount;
+            notificationBadge.classList.remove('hidden');
+        } else {
+            notificationBadge.classList.add('hidden');
+        }
+    }
+
+    function markAsRead(id) {
+        const notif = notifications.find(n => n.id === id);
+        if (notif) {
+            notif.unread = false;
+            renderNotifications();
+            updateNotificationBadge();
+        }
+    }
+
+    notificationTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        notificationDrawer.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!notificationDrawer.contains(e.target) && e.target !== notificationTrigger) {
+            notificationDrawer.classList.remove('active');
+        }
+    });
+
+    clearAllNotifBtn.addEventListener('click', () => {
+        notifications = [];
+        renderNotifications();
+        updateNotificationBadge();
+    });
+
+    renderNotifications();
+    updateNotificationBadge();
+
     // Initial Workflows Render
     renderWorkflows();
+
+
+
 
     function typeText(element, text) {
         return new Promise(resolve => {
