@@ -437,47 +437,47 @@ document.addEventListener('DOMContentLoaded', () => {
         if (name.includes('invoice')) {
             return [
                 { label: 'Document Type', value: 'Commercial Invoice', confidence: 'high' },
-                { label: 'Full Name', value: 'Alexander Wright', confidence: 'high' },
-                { label: 'Date', value: 'March 08, 2026', confidence: 'high' },
-                { label: 'Amount', value: '₹500.00 INR', confidence: 'medium' },
+                { label: 'Full Name', value: 'Rajesh Sharma', confidence: 'high' },
+                { label: 'Date', value: 'March 26, 2026', confidence: 'high' },
+                { label: 'Amount', value: '₹30,000 INR', confidence: 'medium' },
                 { label: 'Invoice Number', value: 'INV-2026-042', confidence: 'high' },
-                { label: 'Organization', value: 'NovaStream Technologies', confidence: 'high' },
-                { label: 'Summary', value: 'Service agreement for Q1 infrastructure maintenance and cloud optimization services.', confidence: 'medium', isSummary: true }
+                { label: 'Organization', value: 'TechNova Solutions Pvt Ltd', confidence: 'high' },
+                { label: 'Summary', value: 'Invoice for services rendered.', confidence: 'medium', isSummary: true }
             ];
         } else if (name.includes('contract') || name.includes('agreement')) {
             return [
                 { label: 'Document Type', value: 'Service Contract', confidence: 'high' },
                 { label: 'Agreement Type', value: 'Service Level Agreement', confidence: 'high' },
-                { label: 'Client', value: 'Apex Solutions', confidence: 'high' },
-                { label: 'Effective Date', value: 'Mar 02, 2026', confidence: 'high' },
+                { label: 'Client', value: 'Aditya Mehta', confidence: 'high' },
+                { label: 'Effective Date', value: 'February 05, 2026', confidence: 'high' },
                 { label: 'Term', value: '24 Months', confidence: 'medium' },
-                { label: 'Summary', value: 'Comprehensive service level agreement for IT support and maintenance.', confidence: 'medium', isSummary: true }
+                { label: 'Summary', value: 'The client agrees to pay a total amount of ₹1,20,000 for the services provided.Payment will e made in three installments.', confidence: 'medium', isSummary: true }
             ];
         } else if (name.includes('receipt')) {
             return [
                 { label: 'Document Type', value: 'Business Receipt', confidence: 'high' },
-                { label: 'Vendor', value: 'Office Depot', confidence: 'high' },
-                { label: 'Total', value: '₹342.80', confidence: 'high' },
-                { label: 'Date', value: 'Mar 09, 2026', confidence: 'high' },
-                { label: 'Item', value: 'Ergonomic Chair', confidence: 'medium' },
-                { label: 'Summary', value: 'Purchase receipt for office supplies and equipment.', confidence: 'medium', isSummary: true }
+                { label: 'Vendor', value: 'QuickFix Electronics', confidence: 'high' },
+                { label: 'Total', value: '₹2,500', confidence: 'high' },
+                { label: 'Date', value: 'March 09, 2026', confidence: 'high' },
+                { label: 'Item', value: 'Laptop Repair Service', confidence: 'medium' },
+                { label: 'Summary', value: 'Laptop Repair Service.', confidence: 'medium', isSummary: true }
             ];
         } else if (name.includes('id') || name.includes('passport')) {
             return [
-                { label: 'Document Type', value: 'Passport/ID', confidence: 'high' },
-                { label: 'Full Name', value: 'James Wilson', confidence: 'high' },
-                { label: 'Document Number', value: 'P-992031B', confidence: 'high' },
-                { label: 'DOB', value: 'May 14, 1988', confidence: 'high' },
+                { label: 'Document Type', value: 'National ID card', confidence: 'high' },
+                { label: 'Full Name', value: 'Priya Kulkarni', confidence: 'high' },
+                { label: 'Document Number', value: 'IND-ID-45879231', confidence: 'high' },
+                { label: 'DOB', value: 'August 15, 1998', confidence: 'high' },
                 { label: 'Summary', value: 'Identification document with personal details.', confidence: 'medium', isSummary: true }
             ];
         } else if (name.includes('report')) {
             return [
                 { label: 'Document Type', value: 'Financial Report', confidence: 'high' },
-                { label: 'Report Title', value: 'Q3 Annual Summary', confidence: 'high' },
-                { label: 'Fiscal Year', value: '2025', confidence: 'high' },
-                { label: 'Total Revenue', value: '₹180,000.00', confidence: 'high' },
-                { label: 'Auditor', value: 'Grant & Sons', confidence: 'medium' },
-                { label: 'Summary', value: 'Quarterly financial performance report.', confidence: 'medium', isSummary: true }
+                { label: 'Report Title', value: 'Q2 Annual Summary', confidence: 'high' },
+                { label: 'Fiscal Year', value: '2026', confidence: 'high' },
+                { label: 'Total Revenue', value: '₹12,45,000', confidence: 'high' },
+                { label: 'Auditor', value: 'SmartRetail India Pvt Ltd', confidence: 'medium' },
+                { label: 'Summary', value: 'Sales increased by 18% compared to February 2026.The highest demand was observed for smart watches in metropolitan cities.', confidence: 'medium', isSummary: true }
             ];
         } else {
             // Default
